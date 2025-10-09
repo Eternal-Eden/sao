@@ -1,4 +1,4 @@
 # 炫压抑实录
 > 本仓库仅用于记录群：国际开拓旅行的猫娘绳匠中的涩话
 
-![这是图片]("https://api.miaomc.cn/image/get")
+![记录罪证](/assets/初音表情包第二弹_4_起个id真麻烦_来自小红书网页版.jpg "Magic Gardens")
