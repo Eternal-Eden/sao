@@ -1,11 +1,402 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>群U涩话实录</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1em;
+            color: #666;
+        }
+
+        .controls {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .add-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .add-btn:hover {
+            background: #0056b3;
+        }
+
+        .danmaku-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .danmaku-item {
+            position: absolute;
+            white-space: nowrap;
+            font-size: 16px;
+            font-weight: 500;
+            animation: danmaku-move 10s linear infinite;
+            cursor: pointer;
+        }
+
+        @keyframes danmaku-move {
+            from {
+                transform: translateX(100vw);
+            }
+            to {
+                transform: translateX(-100%);
+            }
+        }
+
+        .stats {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            right: 15px;
+            top: 10px;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .form-title {
+            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 1.5em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .submit-btn:hover {
+            background: #0056b3;
+        }
+
+        .color-1 { color: #e74c3c; }
+        .color-2 { color: #3498db; }
+        .color-3 { color: #2ecc71; }
+        .color-4 { color: #f39c12; }
+        .color-5 { color: #9b59b6; }
+        .color-6 { color: #1abc9c; }
+        .color-7 { color: #34495e; }
+        .color-8 { color: #e67e22; }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .danmaku-container {
+                height: 300px;
+            }
+            
+            .modal-content {
+                margin: 20% auto;
+                padding: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
-    
+    <div class="container">
+        <div class="header">
+            <h1>群U涩话实录</h1>
+        </div>
+
+        <div class="controls">
+            <button class="add-btn" id="addBtn">+ 添加弹幕</button>
+        </div>
+
+        <div class="danmaku-container" id="danmakuContainer">
+            <!-- 弹幕 -->
+        </div>
+
+        <div class="stats" id="stats">
+            <!-- 统计信息 -->
+        </div>
+    </div>
+
+    <!-- 模态框 -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeBtn">&times;</span>
+            <h2 class="form-title">添加新弹幕</h2>
+            <form id="danmakuForm">
+                <div class="form-group">
+                    <label for="username">群U:</label>
+                    <input type="text" id="username" name="username" required placeholder="请输入群友昵称">
+                </div>
+                <div class="form-group">
+                    <label for="content">涩话:</label>
+                    <textarea id="content" name="content" required placeholder="请输入内容..."></textarea>
+                </div>
+                <button type="submit" class="submit-btn">提交</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 原始数据
+        const originalData = [
+            "珞雪：灌满你",
+            "大海：看到维什戴尔我就敏感了",
+            "珞雪：看看唧唧",
+            "珞雪：不应该是看看唧唧吗",
+            "珞雪：来给我摸摸",
+            "要杀要刮，都不行：主银要达我吗",
+            "珞雪：缺我的kiss了",
+            "珞雪：让我摸摸",
+            "珞雪：来我怀里♥",
+            "珞雪：老婆我可以塞进你身体吗",
+            "珞雪：来舌吻",
+            "珞雪：吃我唧唧"
+        ];
+
+        // 颜色类名数组
+        const colorClasses = ['color-1', 'color-2', 'color-3', 'color-4', 'color-5', 'color-6', 'color-7', 'color-8'];
+
+        // 获取所有弹幕数据（原始数据 + localStorage中的数据）
+        function getAllDanmaku() {
+            const storedData = JSON.parse(localStorage.getItem('newDanmaku') || '[]');
+            return [...originalData, ...storedData];
+        }
+
+        // 创建弹幕元素
+        function createDanmakuElement(text, delay = 0) {
+            const danmaku = document.createElement('div');
+            danmaku.className = 'danmaku-item ' + colorClasses[Math.floor(Math.random() * colorClasses.length)];
+            danmaku.textContent = text;
+            
+            // 随机垂直位置
+            const top = Math.random() * 350; // 容器高度减去文字高度
+            danmaku.style.top = top + 'px';
+            
+            // 设置延迟
+            danmaku.style.animationDelay = delay + 's';
+            
+            return danmaku;
+        }
+
+        // 启动弹幕
+        function startDanmaku() {
+            const container = document.getElementById('danmakuContainer');
+            const allDanmaku = getAllDanmaku();
+            
+            // 清空容器
+            container.innerHTML = '';
+            
+            // 创建弹幕
+            allDanmaku.forEach((text, index) => {
+                const delay = (index * 2) % 15; // 每2秒一个弹幕，15秒循环
+                const danmaku = createDanmakuElement(text, delay);
+                container.appendChild(danmaku);
+                
+                // 弹幕结束后重新开始
+                setTimeout(() => {
+                    danmaku.addEventListener('animationend', () => {
+                        const newDelay = Math.random() * 3; // 随机延迟0-3秒
+                        danmaku.style.animationDelay = newDelay + 's';
+                        danmaku.style.top = Math.random() * 350 + 'px';
+                    });
+                }, delay * 1000);
+            });
+        }
+
+        // 更新统计信息
+        function updateStats() {
+            const allDanmaku = getAllDanmaku();
+            const statsElement = document.getElementById('stats');
+            statsElement.innerHTML = `当前共有 ${allDanmaku.length} 条弹幕`;
+        }
+
+        // 模态框控制
+        const modal = document.getElementById('modal');
+        const addBtn = document.getElementById('addBtn');
+        const closeBtn = document.getElementById('closeBtn');
+
+        // 打开模态框
+        addBtn.addEventListener('click', function() {
+            modal.style.display = 'block';
+        });
+
+        // 关闭模态框
+        closeBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+
+        // 点击模态框外部关闭
+        window.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // 表单提交处理
+        document.getElementById('danmakuForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const content = document.getElementById('content').value.trim();
+            
+            if (!username || !content) {
+                alert('请填写完整的群U和内容！');
+                return;
+            }
+            
+            // 格式化新数据
+            const newDanmaku = `${username}：${content}`;
+            
+            // 保存到localStorage
+            const storedData = JSON.parse(localStorage.getItem('newDanmaku') || '[]');
+            storedData.push(newDanmaku);
+            localStorage.setItem('newDanmaku', JSON.stringify(storedData));
+            
+            // 清空表单
+            document.getElementById('username').value = '';
+            document.getElementById('content').value = '';
+            
+            // 关闭模态框
+            modal.style.display = 'none';
+            
+            // 显示成功消息
+            alert('提交成功！弹幕已更新！');
+            
+            // 重新启动弹幕和更新统计
+            startDanmaku();
+            updateStats();
+        });
+
+        // 页面加载完成后启动
+        document.addEventListener('DOMContentLoaded', function() {
+            startDanmaku();
+            updateStats();
+            
+            // 每30秒重新启动弹幕以保持活跃
+            setInterval(() => {
+                startDanmaku();
+            }, 30000);
+        });
+
+        // ESC键关闭模态框
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                modal.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>
